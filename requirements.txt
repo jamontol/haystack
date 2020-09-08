@@ -18,5 +18,6 @@ python-multipart
 python-docx
 sqlalchemy_utils
 # for using FAISS with GPUs, install faiss-gpu
-faiss-cpu
+faiss-gpu
+#faiss-cpu
 tika
