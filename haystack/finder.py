@@ -23,13 +23,14 @@ class Finder:
     It provides an interface to predict top n answers for a given question.
     """
 
-    def __init__(self, reader: Optional[BaseReader], retriever: Optional[BaseRetriever]):
+    def __init__(self, reader: Optional[BaseReader], retriever: Optional[BaseRetriever], metadata:DataFrame):
         self.retriever = retriever
         self.reader = reader
+        self.metadata = metadata
         if self.reader is None and self.retriever is None:
             raise AttributeError("Finder: self.reader and self.retriever can not be both None")
 
-    def get_answers(self, question: str, top_k_reader: int = 1, top_k_retriever: int = 10, filters: Optional[dict] = None):
+    def get_answers(self, question: str, top_k_reader: int = 1, top_k_retriever: int = 10, filters: Optional[dict] = None,  closest_docs_indices = None):
         """
         Get top k answers for a given question.
 
@@ -43,9 +44,28 @@ class Finder:
 
         if self.retriever is None or self.reader is None:
             raise AttributeError("Finder.get_answers requires self.retriever AND self.reader")
+        
+        ######### JAVI #####
+        if self.retriever is "USE_LSA": 
+            pass #TODO
+        if self.retriever = None and closest_docs_indices != None:
 
-        # 1) Apply retriever(with optional filters) to get fast candidate documents
-        documents = self.retriever.retrieve(question, filters=filters, top_k=top_k_retriever)
+            squad_examples = generate_squad_examples(
+            question=query,
+            best_idx_scores = closest_docs_indices,
+            metadata = self.metadata,
+            retrieve_by_doc = True
+            )
+            paragrafos = squad_examples[0]['paragraphs']
+            documents=[]
+            for para in paragrafos:
+                
+                documents.append(Document(text=para['context'],id=str(uuid.uuid4()), query_score=1, question=question))
+
+            ##################
+        else:
+            # 1) Apply retriever(with optional filters) to get fast candidate documents
+            documents = self.retriever.retrieve(question, filters=filters, top_k=top_k_retriever)
 
         if len(documents) == 0:
             logger.info("Retriever did not return any documents. Skipping reader ...")
@@ -68,6 +88,7 @@ class Finder:
                     ans["meta"] = doc.meta
 
         return results
+
 
     def get_answers_via_similar_questions(self, question: str, top_k_retriever: int = 10, filters: Optional[dict] = None):
         """
