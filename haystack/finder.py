@@ -48,10 +48,10 @@ class Finder:
         ######### JAVI #####
         if self.retriever is "USE_LSA": 
             pass #TODO
-        if self.retriever = None and closest_docs_indices != None:
+        if self.retriever is None and closest_docs_indices is not None:
 
             squad_examples = generate_squad_examples(
-            question=query,
+            question=question,
             best_idx_scores = closest_docs_indices,
             metadata = self.metadata,
             retrieve_by_doc = True
@@ -62,7 +62,7 @@ class Finder:
                 
                 documents.append(Document(text=para['context'],id=str(uuid.uuid4()), query_score=1, question=question))
 
-            ##################
+        ##################
         else:
             # 1) Apply retriever(with optional filters) to get fast candidate documents
             documents = self.retriever.retrieve(question, filters=filters, top_k=top_k_retriever)
