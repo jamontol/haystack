@@ -53,7 +53,7 @@ class Finder:
             pass #TODO
         if self.retriever is None and closest_docs_indices is not None:
 
-            squad_examples = generate_squad_examples(
+            squad_examples = self.generate_squad_examples(
             question=question,
             best_idx_scores = closest_docs_indices,
             metadata = self.metadata,
