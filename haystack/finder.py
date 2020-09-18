@@ -43,7 +43,7 @@ class Finder:
         :return:
         """
 
-        if self.retriever is None or self.reader is None:
+        if self.retriever is None and self.reader is None:
             raise AttributeError("Finder.get_answers requires self.retriever AND self.reader")
         
         ######### JAVI #####
