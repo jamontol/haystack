@@ -14,6 +14,8 @@ from haystack.eval import calculate_average_precision, eval_counts_reader_batch,
     eval_counts_reader
 from pandas import DataFrame
 
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -450,3 +452,71 @@ class Finder:
 
         return eval_results
 
+    @staticmethod
+    def generate_squad_examples(question, best_idx_scores, metadata, retrieve_by_doc):
+        """
+        Creates a SQuAD examples json object for a given for a given question using outputs of retriever and document database.
+
+        Parameters
+        ----------
+        question : [type]
+            [description]
+        best_idx_scores : [type]
+            [description]
+        metadata : [type]
+            [description]
+
+        Returns
+        -------
+        squad_examples: list
+            [description]
+
+        Examples
+        --------
+        >>> from cdqa.utils.converter import generate_squad_examples
+        >>> squad_examples = generate_squad_examples(question='Since when does the the Excellence Program of BNP Paribas exist?',
+                                            best_idx_scores=[(788, 1.2), (408, 0.4), (2419, 0.2)],
+                                            metadata=df)
+
+        """
+
+        squad_examples = []
+
+        metadata_sliced = metadata.loc[best_idx_scores.keys()]
+
+        for idx, row in metadata_sliced.iterrows():
+            temp = {"title": row["title"], "paragraphs": []}
+
+            if retrieve_by_doc:
+                for paragraph in row["paragraphs"]:
+                    temp["paragraphs"].append(
+                        {
+                            "context": paragraph,
+                            "qas": [
+                                {
+                                    "answers": [],
+                                    "question": question,
+                                    "id": str(uuid.uuid4()),
+                                    "retriever_score": best_idx_scores[idx],
+                                }
+                            ],
+                        }
+                    )
+            else:
+                temp["paragraphs"] = [
+                    {
+                        "context": row["content"],
+                        "qas": [
+                            {
+                                "answers": [],
+                                "question": question,
+                                "id": str(uuid.uuid4()),
+                                "retriever_score": best_idx_scores[idx],
+                            }
+                        ],
+                    }
+                ]
+
+            squad_examples.append(temp)
+
+        return squad_examples
