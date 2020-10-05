@@ -13,7 +13,7 @@ from haystack.database.base import MultiLabel, Document
 from haystack.eval import calculate_average_precision, eval_counts_reader_batch, calculate_reader_metrics, \
     eval_counts_reader
 from pandas import DataFrame
-
+import uuid
 
 
 logger = logging.getLogger(__name__)
